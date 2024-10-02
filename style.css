@@ -1,42 +1,71 @@
-* {
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
 }
 
 .container {
-    text-align: center;
-    background-color: #fff;
+    max-width: 500px;
+    margin: 50px auto;
     padding: 20px;
+    background-color: white;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+}
+
+h1 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.textbox input {
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* ボタン間のスペース */
 }
 
 button {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #007BFF;
-    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    background-color: #007bff;
+    color: white;
 }
 
 button:hover {
     background-color: #0056b3;
 }
 
-p {
-    margin-top: 20px;
-    font-size: 24px;
-    font-weight: bold;
+#barcode {
+    margin: 20px 0;
+}
+
+#image-area img {
+    display: block;
+    margin: 10px auto;
+    border: 2px solid black;
+}
+
+button#pdf-btn {
+    background-color: #28a745;
+}
+
+button#pdf-btn:hover {
+    background-color: #218838;
 }

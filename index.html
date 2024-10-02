@@ -3,16 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ランダム13桁の数字とJANコードバーコード</title>
+    <title>バーコード生成アプリ</title>
     <link rel="stylesheet" href="style.css">
+    <!-- jsPDF ライブラリを読み込む -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
+    
 <body>
+
     <div class="container">
-        <button id="generate-btn">数字を生成</button>
-        <p id="random-number">0000000000000</p>
+        <h1>バーコード生成アプリ</h1>
+
+        <!-- テキストボックス -->
+        <div class="textbox">
+            <input type="text" id="textbox1" value="テキスト1" />
+        </div>
+        <div class="textbox">
+            <input type="text" id="textbox2" value="テキスト2" />
+        </div>
+        <div class="textbox">
+            <input type="text" id="textbox3" value="テキスト3" />
+        </div>
+
+        <!-- ボタンコンテナ -->
+        <div class="button-container">
+            <button id="generate-btn">数字を生成</button>
+            <button id="pdf-btn">PDFを生成</button>
+        </div>
+
+        <!-- テキスト表示エリア -->
+        <div id="user-text1"></div>
+        <div id="user-text2"></div>
+        <div id="user-text3"></div>
+
+        <!-- バーコード表示エリア -->
         <svg id="barcode"></svg>
+
+        <!-- 画像表示エリア -->
+        <div id="image-area"></div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
     <script src="script.js"></script>
+
 </body>
-</html>
