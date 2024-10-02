@@ -1,16 +1,30 @@
+// 定数 barcodeNumber を定義
+const barcodeNumber = "451234567890";
+
 // ボタンと表示部分を取得
 const generateBtn = document.getElementById('generate-btn');
 const pdfBtn = document.getElementById('pdf-btn');
-const barcodeSvg = document.getElementById('barcode');
 const imageArea = document.getElementById('image-area'); // 画像表示エリアを追加
 
-// テキストボックスと表示エリアを取得
+// テキストボックスを取得
 const textbox1 = document.getElementById('textbox1');
 const textbox2 = document.getElementById('textbox2');
 const textbox3 = document.getElementById('textbox3');
-const userText1 = document.getElementById('user-text1');
-const userText2 = document.getElementById('user-text2');
-const userText3 = document.getElementById('user-text3');
+const textbox4 = document.getElementById('textbox4');
+const errorMessage = document.getElementById('error-message');  // 【修正箇所】エラーメッセージの要素を取得
+
+// テキストボックス4の初期値に barcodeNumber を設定
+textbox4.value = barcodeNumber;
+
+// テキストボックス4のリアルタイム入力バリデーション 【修正箇所】
+textbox4.addEventListener('input', function() {
+    const isValid = textbox4.checkValidity();  // `pattern`属性に基づいてバリデーションをチェック
+    if (!isValid) {
+        errorMessage.style.display = 'block';  // エラーメッセージを表示
+    } else {
+        errorMessage.style.display = 'none';  // エラーメッセージを非表示
+    }
+});
 
 // JANコードのチェックディジットを計算する関数
 function calculateCheckDigit(number) {
@@ -23,110 +37,65 @@ function calculateCheckDigit(number) {
     return checkDigit;
 }
 
-// 12桁のランダムな数字を生成し、先頭2桁を45に固定し、チェックディジットを追加して13桁にする関数
-function generateRandomNumber() {
-    let randomNumber = '45';
-    for (let i = 0; i < 10; i++) {
-        randomNumber += Math.floor(Math.random() * 10);
-    }
-    const checkDigit = calculateCheckDigit(randomNumber);
-    return randomNumber + checkDigit;
-}
-
-// バーコードを生成する関数
-function generateBarcode(number) {
-    JsBarcode(barcodeSvg, number, {
-        format: "EAN13",
-        flat: false,
-        lineColor: "#000",
-        width: 2,
-        height: 100,
-        displayValue: true,
-        fontSize: 18,
-        textMargin: 0,
-        fontOptions: "bold",
-    });
-}
-
-// 「バーコード」画像を生成し、テキストボックスの内容を上端に配置し、バーコードを右下に寄せる関数
+// 「バーコード」画像を生成し、テキストボックス1, 2, 3の内容を画像に埋め込み、バーコードを右下に寄せる関数
 function generateBarcodeImage(number) {
     const canvas = document.createElement('canvas');
-    const scaleFactor = 2;  // 高精細のためのスケーリング要素
-    canvas.width = 400 * scaleFactor;  // 矩形の幅を高精細に
-    canvas.height = 200 * scaleFactor;  // 矩形の高さを高精細に
+    const scaleFactor = 2;
+    canvas.width = 400 * scaleFactor;
+    canvas.height = 200 * scaleFactor;
     const ctx = canvas.getContext('2d');
 
     // 背景を白色に設定
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 黒色の枠線を描画
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 5;  // 枠線の太さ
-    ctx.strokeRect(0, 0, canvas.width, canvas.height);
-
-    // テキストを上端に寄せて表示（最初のテキストを右に10px、下に10px移動）
+    // テキストを埋め込む処理
     ctx.fillStyle = "black";
-    ctx.font = `${16 * scaleFactor}px Arial`;  // フォントサイズを16に設定
-    ctx.textAlign = "left";  // テキストを左揃えに設定
-    const textXPosition = (10 + 10) * scaleFactor;  // テキストのX位置（左端から10pxの位置をさらに10px右に移動）
-    const textYPosition = (20 + 10) * scaleFactor;  // 最初のテキストのY位置（上端から20pxの位置をさらに10px下に移動）
+    ctx.font = `${16 * scaleFactor}px Arial`;
+    ctx.textAlign = "left";
+    const textXPosition = 20 * scaleFactor;
+    const textYPosition = 30 * scaleFactor;
 
     // テキストボックス1, 2, 3の内容を取得して描画
-    ctx.fillText(textbox1.value, textXPosition, textYPosition);  // テキスト1
-    ctx.fillText(textbox2.value, textXPosition, textYPosition + 20 * scaleFactor);  // テキスト2
-    ctx.fillText(textbox3.value, textXPosition, textYPosition + 40 * scaleFactor);  // テキスト3
+    ctx.fillText(textbox1.value, textXPosition, textYPosition);
+    ctx.fillText(textbox2.value, textXPosition, textYPosition + 20 * scaleFactor);
+    ctx.fillText(textbox3.value, textXPosition, textYPosition + 40 * scaleFactor);
 
     // バーコードを生成してキャンバスに描画
     const barcodeCanvas = document.createElement('canvas');
     JsBarcode(barcodeCanvas, number, {
         format: "EAN13",
         displayValue: true,
-        fontSize: 20 * scaleFactor,  // バーコード下の数字のフォントサイズ
+        fontSize: 20 * scaleFactor,
         lineColor: "#000",
         width: 2 * scaleFactor,
-        height: 70 * scaleFactor,  // バーコードの高さを70に設定
+        height: 70 * scaleFactor,
     });
 
-    // バーコードを白矩形内の右下に配置する（右端から20px、下端から15pxの余白）
-    const barcodeWidth = barcodeCanvas.width;  // バーコードの幅
-    const barcodeHeight = barcodeCanvas.height;  // バーコードの高さ
-    const xPosition = canvas.width - barcodeWidth - 20 * scaleFactor;  // 右端に20pxの余白を設けて配置
-    const yPosition = canvas.height - barcodeHeight - 15 * scaleFactor;  // 下端に15pxの余白を設けて配置
-    ctx.drawImage(barcodeCanvas, xPosition, yPosition, barcodeWidth, barcodeHeight);  // 右下に描画
+    const barcodeWidth = barcodeCanvas.width;
+    const barcodeHeight = barcodeCanvas.height;
+    const xPosition = canvas.width - barcodeWidth - 20 * scaleFactor;
+    const yPosition = canvas.height - barcodeHeight - 15 * scaleFactor;
+    ctx.drawImage(barcodeCanvas, xPosition, yPosition, barcodeWidth, barcodeHeight);
 
-    // PNG画像を生成して表示（スケーリングを反映して縮小）
+    // PNG画像を生成して表示
     const dataURL = canvas.toDataURL('image/png');
     const imgElement = document.createElement('img');
     imgElement.src = dataURL;
-    imgElement.width = 400;  // 表示する画像の幅を400に設定
-    imgElement.height = 200;  // 表示する画像の高さを200に設定
+    imgElement.width = 400;
+    imgElement.height = 200;
 
     // 既存の画像を消して新しい画像を表示
     imageArea.innerHTML = '';
     imageArea.appendChild(imgElement);
+
+    return canvas; // Return the canvas element for further use
 }
 
-// 初期状態でテキストボックスの内容を表示
-function displayInitialText() {
-    userText1.textContent = textbox1.value;
-    userText2.textContent = textbox2.value;
-    userText3.textContent = textbox3.value;
-}
-
-// ボタンをクリックしたときにランダムな数字を生成し、バーコードと画像を表示
+// ボタンをクリックしたときにテキストボックス4の値を使用してバーコードを生成し、画像に表示
 generateBtn.addEventListener('click', () => {
-    const randomNumber = generateRandomNumber();
-    displayInitialText();
-    generateBarcode(randomNumber);
-    generateBarcodeImage(randomNumber);  // 白矩形内にバーコードを表示
+    generateBarcodeImage(textbox4.value);  // テキストボックス4の値を使用してバーコードを表示
 });
-
-// 初期のバーコードとテキストを表示
-window.onload = () => {
-    displayInitialText();
-    generateBarcode("0000000000000");
-};
 
 // PDF生成ボタンのクリックイベント
 pdfBtn.addEventListener('click', () => {
@@ -137,34 +106,48 @@ pdfBtn.addEventListener('click', () => {
         format: 'a4',
     });
 
+    // Barcode image generation (ensure it has been generated)
+    const barcodeCanvas = generateBarcodeImage(textbox4.value);
+
+    // Check if barcodeCanvas is available
+    if (!barcodeCanvas) {
+        alert("Error: Barcode image could not be generated.");
+        return;
+    }
+
+    const imageData = barcodeCanvas.toDataURL('image/png'); // Get the barcode image as a PNG
+
     // 用紙の余白設定
-    const marginX = 8.4;  // 左右の余白
-    const marginY = 8.8;  // 上下の余白
-
-    // セルのサイズ設定
-    const cellWidth = 48.3;  // 各セルの横幅
-    const cellHeight = 25.4; // 各セルの縦幅（297mmから上下の余白を引いた高さを11分割）
-
-    // 行数と列数
+    const marginX = 8.4;
+    const marginY = 8.8;
+    const cellWidth = 48.3;
+    const cellHeight = 25.4;
     const columns = 4;
     const rows = 11;
 
     // 外枠の描画（A4の余白内）
-    const totalWidth = (columns * cellWidth);
-    const totalHeight = (rows * cellHeight);
+    // const totalWidth = (columns * cellWidth);
+    // const totalHeight = (rows * cellHeight);
     
-    doc.rect(marginX, marginY, totalWidth, totalHeight);
+    // doc.rect(marginX, marginY, totalWidth, totalHeight);
 
-    // 行の罫線を描画
-    for (let row = 0; row <= rows; row++) {
-        const yPos = marginY + row * cellHeight;
-        doc.line(marginX, yPos, marginX + totalWidth, yPos);
-    }
+    // for (let row = 0; row <= rows; row++) {
+    //     const yPos = marginY + row * cellHeight;
+    //     doc.line(marginX, yPos, marginX + totalWidth, yPos);
+    // }
 
-    // 列の罫線を描画
-    for (let col = 0; col <= columns; col++) {
-        const xPos = marginX + col * cellWidth;
-        doc.line(xPos, marginY, xPos, marginY + totalHeight);
+    // for (let col = 0; col <= columns; col++) {
+    //     const xPos = marginX + col * cellWidth;
+    //     doc.line(xPos, marginY, xPos, marginY + totalHeight);
+    // }
+
+    // Loop through each cell and insert the barcode image
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < columns; col++) {
+            const xPos = marginX + col * cellWidth;
+            const yPos = marginY + row * cellHeight;
+            doc.addImage(imageData, 'PNG', xPos, yPos, cellWidth, cellHeight);
+        }
     }
 
     // 新しいウィンドウまたはタブでPDFを表示

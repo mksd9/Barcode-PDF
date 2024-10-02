@@ -14,6 +14,9 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;  /* コンテナ内の要素を中央揃え */
 }
 
 h1 {
@@ -25,7 +28,7 @@ h1 {
 .textbox input {
     padding: 10px;
     font-size: 16px;
-    width: 100%;
+    width: 400px;  /* 幅を広く設定 */
     border: 1px solid #ccc;
     border-radius: 5px;
     margin-bottom: 10px;
@@ -56,10 +59,24 @@ button:hover {
     margin: 20px 0;
 }
 
+/* 画像表示エリアのスタイル調整 */
+#image-area {
+    width: 400px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    border: 2px solid black;
+    background-color: white;
+}
+
+/* 画像表示エリア内の画像を中央揃え */
 #image-area img {
     display: block;
-    margin: 10px auto;
-    border: 2px solid black;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
 }
 
 button#pdf-btn {
