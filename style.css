@@ -1,3 +1,4 @@
+/* 基本スタイル */
 body {
     font-family: Arial, sans-serif;
     text-align: center;
@@ -6,8 +7,9 @@ body {
     padding: 0;
 }
 
+/* メインコンテナ */
 .container {
-    max-width: 500px;
+    width: 400px;
     margin: 50px auto;
     padding: 20px;
     background-color: white;
@@ -16,29 +18,29 @@ body {
     border: 1px solid #ddd;
     display: flex;
     flex-direction: column;
-    align-items: center;  /* コンテナ内の要素を中央揃え */
+    align-items: center;
 }
 
+/* 見出し */
 h1 {
     font-size: 24px;
     color: #333;
     margin-bottom: 20px;
 }
 
-.textbox input {
-    padding: 10px;
-    font-size: 16px;
-    width: 400px;  /* 幅を広く設定 */
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    box-sizing: border-box;
+/* ボタン関連のスタイル */
+#button-container {
+    margin: 20px;
 }
 
-.button-container {
+.button-group {
     display: flex;
     justify-content: center;
-    gap: 10px; /* ボタン間のスペース */
+    gap: 20px;
+}
+
+#load-file-btn {
+    margin-bottom: 20px;
 }
 
 button {
@@ -49,40 +51,21 @@ button {
     cursor: pointer;
     background-color: #007bff;
     color: white;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
     background-color: #0056b3;
 }
 
-#barcode {
-    margin: 20px 0;
-}
-
-/* 画像表示エリアのスタイル調整 */
-#image-area {
-    width: 400px;
-    height: 200px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px auto;
-    border: 2px solid black;
-    background-color: white;
-}
-
-/* 画像表示エリア内の画像を中央揃え */
-#image-area img {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    margin: 0 auto;
-}
-
-button#pdf-btn {
-    background-color: #28a745;
-}
-
-button#pdf-btn:hover {
-    background-color: #218838;
+/* バージョン情報のスタイル */
+.version-info {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 12px;
+    color: #666;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 5px 10px;
+    border-radius: 3px;
 }

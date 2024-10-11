@@ -5,43 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>バーコード生成アプリ</title>
     <link rel="stylesheet" href="style.css">
-    <!-- jsPDF ライブラリを読み込む -->
+    <!-- CDNからライブラリを読み込み -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
-    
 <body>
-
     <div class="container">
         <h1>バーコード生成アプリ</h1>
-
-        <!-- テキストボックス -->
-        <div class="textbox">
-            <input type="text" id="textbox1" value="テキスト1" />
-        </div>
-        <div class="textbox">
-            <input type="text" id="textbox2" value="テキスト2" />
-        </div>
-        <div class="textbox">
-            <input type="text" id="textbox3" value="テキスト3" />
-        </div>
-        <!-- テキストボックス4にpattern属性を追加し、12桁の半角数字のみ許可 -->
-        <div class="textbox">
-            <input type="text" id="textbox4" value="451234567890" pattern="\d{12}" title="12桁の半角数字を入力してください" required />
-            <span id="error-message" style="color: red; display: none;">12桁の半角数字を入力してください</span> <!-- エラーメッセージ用の要素を追加 -->
+        
+        <div id="button-container">
+            <button id="load-file-btn">ファイルを読み込み</button>
+            
+            <div class="button-group">
+                <button id="save-barcode-btn">バーコード画像保存</button>
+                <button id="pdf-btn">PDFを生成</button>
+            </div>
         </div>
 
-        <!-- ボタンコンテナ -->
-        <div class="button-container">
-            <button id="generate-btn">バーコードを生成</button>
-            <button id="pdf-btn">PDFを生成</button>
-        </div>
-
-        <!-- 矩形画像表示エリア -->
-        <div id="image-area"></div>
+        <div id="barcode-container"></div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- バージョン表示用の要素を追加 -->
+    <div id="version-info" class="version-info"></div>
 
+    <!-- アプリケーションのスクリプトは最後に読み込む -->
+    <script src="script.js"></script>
 </body>
 </html>
