@@ -130,7 +130,7 @@ function getValidJANCode(input) {
  * @param {string} barcodeNumber - バーコード番号（JANコード）
  * @returns {HTMLImageElement} 生成された画像要素
  */
-function generateBarcodeImage(text1, itemCode, barcodeNumber) {
+function generateBarcodeImage(text1, text2, text3, text4, itemCode, barcodeNumber) {
     // 高解像度対応のためのスケールファクター
     const scaleFactor = 2;
     
@@ -149,10 +149,15 @@ function generateBarcodeImage(text1, itemCode, barcodeNumber) {
     ctx.font = `${16 * scaleFactor}px Arial`;
     ctx.textAlign = "left";
 
-    // 商品名と商品コードの描画
+    // 商品名の各行を描画
     const textX = 20 * scaleFactor;
-    ctx.fillText(text1, textX, 30 * scaleFactor);    // 商品名
-    ctx.fillText(itemCode, textX, 110 * scaleFactor); // 商品コード
+    ctx.fillText(text1, textX, 20 * scaleFactor);    // 商品名1
+    ctx.fillText(text2, textX, 40 * scaleFactor);    // 商品名2
+    ctx.fillText(text3, textX, 60 * scaleFactor);    // 商品名3
+    ctx.fillText(text4, textX, 80 * scaleFactor);    // 商品名4
+
+    // 商品コードの描画
+    ctx.fillText(itemCode, textX, 130 * scaleFactor); // 商品コード
 
     // バーコードの生成（有効なJANコードを使用）
     const validJANCode = getValidJANCode(barcodeNumber);
@@ -193,13 +198,16 @@ function handleFile(event) {
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         
         // 1行目（ヘッダー）を除いてデータを取得
-        // A列: 商品コード, B列: 商品名, C列: JANコード
+        // A列: 商品コード, B列: 商品名1, C列: 商品名2, D列: 商品名3, E列: 商品名4, F列: JANコード
         bufferedData = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
             .slice(1)
             .map(row => ({
                 A: row[0], // 商品コード
-                B: row[1], // 商品名
-                C: row[2]  // JANコード
+                B1: row[1], // 商品名1
+                B2: row[2], // 商品名2
+                B3: row[3], // 商品名3
+                B4: row[4], // 商品名4
+                C: row[5]  // JANコード
             }));
 
         // データを元にバーコードを表示
@@ -220,9 +228,12 @@ function displayBarcodeData() {
     // 各データ行に対してバーコードを生成
     bufferedData.forEach(row => {
         const barcodeImage = generateBarcodeImage(
-            row.B || '',                // 商品名
-            row.A || '',                // 商品コード
-            getValidJANCode(row.C)      // 有効なJANコード
+            row.B1 || '',                // 商品名1
+            row.B2 || '',                // 商品名2
+            row.B3 || '',                // 商品名3
+            row.B4 || '',                // 商品名4
+            row.A || '',                 // 商品コード
+            getValidJANCode(row.C)       // 有効なJANコード
         );
 
         // バーコード画像を包む要素
@@ -232,7 +243,6 @@ function displayBarcodeData() {
         elements.barcodeContainer.appendChild(wrapper);
     });
 }
-
 // ===== PDF生成関連の関数 =====
 
 /**
@@ -247,26 +257,27 @@ async function generatePDF() {
     }
 
     try {
-        // PDF生成の初期化
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-        });
 
-        // 各データ行に対してPDFページを生成
+        // 各データ行に対して個別のPDFを生成
         for (let dataIndex = 0; dataIndex < bufferedData.length; dataIndex++) {
             const row = bufferedData[dataIndex];
-            
-            // 2ページ目以降は新しいページを追加
-            if (dataIndex > 0) doc.addPage();
+
+            // PDF生成の初期化
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
 
             // バーコード画像の生成（有効なJANコードを使用）
             const barcodeImage = generateBarcodeImage(
-                row.B || '',
-                row.A || '',
-                getValidJANCode(row.C)
+                row.B1 || '',                // 商品名1
+                row.B2 || '',                // 商品名2
+                row.B3 || '',                // 商品名3
+                row.B4 || '',                // 商品名4
+                row.A || '',                 // 商品コード
+                getValidJANCode(row.C)       // 有効なJANコード
             );
 
             // 画像の読み込み完了を待機
@@ -291,10 +302,13 @@ async function generatePDF() {
                     );
                 }
             }
-        }
 
-        // PDFを保存（ファイル名にタイムスタンプを付加）
-        doc.save(`barcodes-${new Date().getTime()}.pdf`);
+            // 商品コードをファイル名に使用
+            const fileName = `barcode-${row.A || 'unknown'}.pdf`;
+
+            // PDFを保存
+            doc.save(fileName);
+        }
     } catch (error) {
         console.error('PDF生成エラー:', error);
         alert('PDFの生成中にエラーが発生しました。');
