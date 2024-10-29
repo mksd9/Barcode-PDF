@@ -147,17 +147,21 @@ function generateBarcodeImage(text1, text2, text3, text4, itemCode, barcodeNumbe
     // テキスト描画の設定
     ctx.fillStyle = "black";
     ctx.font = `${16 * scaleFactor}px Arial`;
-    ctx.textAlign = "left";
 
-    // 商品名の各行を描画
+    // キャンバスの中央のx座標を計算
+    const centerX = canvas.width / 2;
+
+    // 商品名の各行を描画（中央揃え）
+    ctx.textAlign = "center"; // 中央揃えに設定
+    ctx.fillText(text1, centerX, 20 * scaleFactor);    // 商品名1
+    ctx.fillText(text2, centerX, 40 * scaleFactor);    // 商品名2
+    ctx.fillText(text3, centerX, 60 * scaleFactor);    // 商品名3
+    ctx.fillText(text4, centerX, 80 * scaleFactor);    // 商品名4
+
+    // 商品コードの描画（左揃え）
+    ctx.textAlign = "left"; // 左揃えに設定
     const textX = 20 * scaleFactor;
-    ctx.fillText(text1, textX, 20 * scaleFactor);    // 商品名1
-    ctx.fillText(text2, textX, 40 * scaleFactor);    // 商品名2
-    ctx.fillText(text3, textX, 60 * scaleFactor);    // 商品名3
-    ctx.fillText(text4, textX, 80 * scaleFactor);    // 商品名4
-
-    // 商品コードの描画
-    ctx.fillText(itemCode, textX, 130 * scaleFactor); // 商品コード
+    ctx.fillText(itemCode, textX, 120 * scaleFactor); // 商品コード
 
     // バーコードの生成（有効なJANコードを使用）
     const validJANCode = getValidJANCode(barcodeNumber);
