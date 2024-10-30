@@ -30,36 +30,30 @@ let bufferedData = [];
  * 初期化時に一括で取得し、以降はこのオブジェクトから参照
  */
 const elements = {
-    pdfBtn: document.getElementById('pdf-btn'),
     loadFileBtn: document.getElementById('load-file-btn'),
     barcodeContainer: document.getElementById('barcode-container'),
     saveBarcodeBtn: document.getElementById('save-barcode-btn')
 };
 
 /**
- * PDF生成時の設定値
- * A4用紙に対するバーコードの配置とサイズを定義
- */
-const PDF_CONFIG = {
-    marginX: 8.4,      // 左右マージン（mm）
-    marginY: 8.8,      // 上下マージン（mm）
-    cellWidth: 48.3,   // 各セルの幅（mm）
-    cellHeight: 25.4,  // 各セルの高さ（mm）
-    columns: 4,        // 1ページあたりの列数
-    rows: 11           // 1ページあたりの行数
-};
-
-/**
  * バーコード生成時の設定値
  * JsBarcode ライブラリに渡すパラメータ
  */
+// const BARCODE_CONFIG = {
+//     format: "EAN13",     // バーコードのフォーマット
+//     displayValue: true,  // バーコード番号を表示するか
+//     fontSize: 40,        // バーコード番号のフォントサイズ
+//     lineColor: "#000",   // バーコードの色
+//     width: 4,            // バーのwidth
+//     height: 140          // バーコードの高さ
+// };
 const BARCODE_CONFIG = {
     format: "EAN13",     // バーコードのフォーマット
     displayValue: true,  // バーコード番号を表示するか
-    fontSize: 40,        // バーコード番号のフォントサイズ
+    fontSize: 80,        // バーコード番号のフォントサイズ
     lineColor: "#000",   // バーコードの色
-    width: 4,            // バーのwidth
-    height: 140          // バーコードの高さ
+    width: 8,            // バーのwidth
+    height: 240          // バーコードの高さ
 };
 
 // ===== 初期化関数 =====
@@ -136,7 +130,7 @@ function generateBarcodeImage(text1, text2, text3, text4, itemCode, barcodeNumbe
     
     // キャンバスの作成と設定
     const canvas = document.createElement('canvas');
-    canvas.width = 400 * scaleFactor;
+    canvas.width = 450 * scaleFactor;
     canvas.height = 200 * scaleFactor;
     const ctx = canvas.getContext('2d');
 
@@ -144,39 +138,20 @@ function generateBarcodeImage(text1, text2, text3, text4, itemCode, barcodeNumbe
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // テキスト描画の設定
-    ctx.fillStyle = "black";
-    ctx.font = `${16 * scaleFactor}px Arial`;
-
-    // キャンバスの中央のx座標を計算
-    const centerX = canvas.width / 2;
-
-    // 商品名の各行を描画（中央揃え）
-    ctx.textAlign = "center"; // 中央揃えに設定
-    ctx.fillText(text1, centerX, 20 * scaleFactor);    // 商品名1
-    ctx.fillText(text2, centerX, 40 * scaleFactor);    // 商品名2
-    ctx.fillText(text3, centerX, 60 * scaleFactor);    // 商品名3
-    ctx.fillText(text4, centerX, 80 * scaleFactor);    // 商品名4
-
-    // 商品コードの描画（左揃え）
-    ctx.textAlign = "left"; // 左揃えに設定
-    const textX = 20 * scaleFactor;
-    ctx.fillText(itemCode, textX, 120 * scaleFactor); // 商品コード
-
     // バーコードの生成（有効なJANコードを使用）
     const validJANCode = getValidJANCode(barcodeNumber);
     const barcodeCanvas = document.createElement('canvas');
     JsBarcode(barcodeCanvas, validJANCode, BARCODE_CONFIG);
 
-    // バーコードを画像の下部に配置
-    const xPos = canvas.width - barcodeCanvas.width - 20 * scaleFactor;
-    const yPos = canvas.height - barcodeCanvas.height - 15 * scaleFactor;
+    // バーコードを画像の中央に配置
+    const xPos = (canvas.width - barcodeCanvas.width) / 2;
+    const yPos = (canvas.height - barcodeCanvas.height) / 2;
     ctx.drawImage(barcodeCanvas, xPos, yPos, barcodeCanvas.width, barcodeCanvas.height);
 
     // 完成した画像をimg要素として出力
     const imgElement = document.createElement('img');
     imgElement.src = canvas.toDataURL('image/png');
-    imgElement.width = 400;
+    imgElement.width = 450;
     imgElement.height = 200;
 
     return imgElement;
@@ -202,16 +177,11 @@ function handleFile(event) {
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         
         // 1行目（ヘッダー）を除いてデータを取得
-        // A列: 商品コード, B列: 商品名1, C列: 商品名2, D列: 商品名3, E列: 商品名4, F列: JANコード
+        // A列: JANコード
         bufferedData = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
             .slice(1)
             .map(row => ({
-                A: row[0], // 商品コード
-                B1: row[1], // 商品名1
-                B2: row[2], // 商品名2
-                B3: row[3], // 商品名3
-                B4: row[4], // 商品名4
-                C: row[5]  // JANコード
+                C: row[0]  // JANコード
             }));
 
         // データを元にバーコードを表示
@@ -232,11 +202,11 @@ function displayBarcodeData() {
     // 各データ行に対してバーコードを生成
     bufferedData.forEach(row => {
         const barcodeImage = generateBarcodeImage(
-            row.B1 || '',                // 商品名1
-            row.B2 || '',                // 商品名2
-            row.B3 || '',                // 商品名3
-            row.B4 || '',                // 商品名4
-            row.A || '',                 // 商品コード
+            '',                // 商品名1
+            '',                // 商品名2
+            '',                // 商品名3
+            '',                // 商品名4
+            '',                // 商品コード
             getValidJANCode(row.C)       // 有効なJANコード
         );
 
@@ -246,77 +216,6 @@ function displayBarcodeData() {
         wrapper.appendChild(barcodeImage);
         elements.barcodeContainer.appendChild(wrapper);
     });
-}
-// ===== PDF生成関連の関数 =====
-
-/**
- * バーコードを含むPDFを生成する関数
- * jsPDFライブラリを使用して、A4サイズのPDFを生成します
- * 1ページに複数のバーコードを配置します
- */
-async function generatePDF() {
-    if (bufferedData.length === 0) {
-        alert("データが存在しないためPDFを生成できません。");
-        return;
-    }
-
-    try {
-        const { jsPDF } = window.jspdf;
-
-        // 各データ行に対して個別のPDFを生成
-        for (let dataIndex = 0; dataIndex < bufferedData.length; dataIndex++) {
-            const row = bufferedData[dataIndex];
-
-            // PDF生成の初期化
-            const doc = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
-
-            // バーコード画像の生成（有効なJANコードを使用）
-            const barcodeImage = generateBarcodeImage(
-                row.B1 || '',                // 商品名1
-                row.B2 || '',                // 商品名2
-                row.B3 || '',                // 商品名3
-                row.B4 || '',                // 商品名4
-                row.A || '',                 // 商品コード
-                getValidJANCode(row.C)       // 有効なJANコード
-            );
-
-            // 画像の読み込み完了を待機
-            await new Promise(resolve => {
-                if (barcodeImage.complete) resolve();
-                else barcodeImage.onload = resolve;
-            });
-
-            // ページ内にバーコードを格子状に配置
-            for (let row = 0; row < PDF_CONFIG.rows; row++) {
-                for (let col = 0; col < PDF_CONFIG.columns; col++) {
-                    const xPos = PDF_CONFIG.marginX + col * PDF_CONFIG.cellWidth;
-                    const yPos = PDF_CONFIG.marginY + row * PDF_CONFIG.cellHeight;
-                    
-                    doc.addImage(
-                        barcodeImage,
-                        'PNG',
-                        xPos,
-                        yPos,
-                        PDF_CONFIG.cellWidth,
-                        PDF_CONFIG.cellHeight
-                    );
-                }
-            }
-
-            // 商品コードをファイル名に使用
-            const fileName = `barcode-${row.A || 'unknown'}.pdf`;
-
-            // PDFを保存
-            doc.save(fileName);
-        }
-    } catch (error) {
-        console.error('PDF生成エラー:', error);
-        alert('PDFの生成中にエラーが発生しました。');
-    }
 }
 
 // ===== バーコード画像保存関連の関数 =====
@@ -374,12 +273,6 @@ elements.loadFileBtn.addEventListener('click', () => {
     fileInput.addEventListener('change', handleFile);
     fileInput.click();
 });
-
-/**
- * PDF生成ボタンのクリックイベント
- * 現在のデータを元にPDFを生成します
- */
-elements.pdfBtn.addEventListener('click', generatePDF);
 
 /**
  * バーコード画像保存ボタンのクリックイベント
