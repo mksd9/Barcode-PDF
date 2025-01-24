@@ -143,15 +143,16 @@ function handleFile(event) {
         const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         
+        // データ読み込み時に文字列変換を実施
         bufferedData = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
             .slice(1)
             .map(row => ({
-                A: row[0],   // 商品コード
-                B1: row[1],  // 商品名1
-                B2: row[2],  // 商品名2
-                B3: row[3],  // 商品名3
-                B4: row[4],  // 商品名4
-                C: row[5]    // JANコード
+                A: String(row[0] || ''),   // 商品コード
+                B1: String(row[1] || ''),  // 商品名1
+                B2: String(row[2] || ''),  // 商品名2
+                B3: String(row[3] || ''),  // 商品名3
+                B4: String(row[4] || ''),  // 商品名4
+                C: String(row[5] || '')    // JANコード
             }));
 
         alert("ファイルの読み込みが完了しました。");
