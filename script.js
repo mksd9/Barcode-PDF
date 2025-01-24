@@ -254,6 +254,72 @@ function displayBarcodeData() {
  * jsPDFライブラリを使用して、A4サイズのPDFを生成します
  * 1ページに複数のバーコードを配置します
  */
+// async function generatePDF() {
+//     if (bufferedData.length === 0) {
+//         alert("データが存在しないためPDFを生成できません。");
+//         return;
+//     }
+
+//     try {
+//         const { jsPDF } = window.jspdf;
+
+//         // 各データ行に対して個別のPDFを生成
+//         for (let dataIndex = 0; dataIndex < bufferedData.length; dataIndex++) {
+//             const row = bufferedData[dataIndex];
+
+//             // PDF生成の初期化
+//             const doc = new jsPDF({
+//                 orientation: 'portrait',
+//                 unit: 'mm',
+//                 format: 'a4'
+//             });
+
+//             // バーコード画像の生成（有効なJANコードを使用）
+//             const barcodeImage = generateBarcodeImage(
+//                 row.B1 || '',                // 商品名1
+//                 row.B2 || '',                // 商品名2
+//                 row.B3 || '',                // 商品名3
+//                 row.B4 || '',                // 商品名4
+//                 row.A || '',                 // 商品コード
+//                 getValidJANCode(row.C)       // 有効なJANコード
+//             );
+
+//             // 画像の読み込み完了を待機
+//             await new Promise(resolve => {
+//                 if (barcodeImage.complete) resolve();
+//                 else barcodeImage.onload = resolve;
+//             });
+
+//             // ページ内にバーコードを格子状に配置
+//             for (let row = 0; row < PDF_CONFIG.rows; row++) {
+//                 for (let col = 0; col < PDF_CONFIG.columns; col++) {
+//                     const xPos = PDF_CONFIG.marginX + col * PDF_CONFIG.cellWidth;
+//                     const yPos = PDF_CONFIG.marginY + row * PDF_CONFIG.cellHeight;
+                    
+//                     doc.addImage(
+//                         barcodeImage,
+//                         'PNG',
+//                         xPos,
+//                         yPos,
+//                         PDF_CONFIG.cellWidth,
+//                         PDF_CONFIG.cellHeight
+//                     );
+//                 }
+//             }
+
+//             // 商品コードをファイル名に使用
+//             const fileName = `barcode-${row.A || 'unknown'}.pdf`;
+
+//             // PDFを保存
+//             doc.save(fileName);
+//         }
+//     } catch (error) {
+//         console.error('PDF生成エラー:', error);
+//         alert('PDFの生成中にエラーが発生しました。');
+//     }
+// }
+
+// ===== バーコード画像保存関連の関数 =====
 async function generatePDF() {
     if (bufferedData.length === 0) {
         alert("データが存在しないためPDFを生成できません。");
@@ -262,64 +328,78 @@ async function generatePDF() {
 
     try {
         const { jsPDF } = window.jspdf;
+        let processedCount = 0;
+        const totalCount = bufferedData.length;
 
-        // 各データ行に対して個別のPDFを生成
-        for (let dataIndex = 0; dataIndex < bufferedData.length; dataIndex++) {
-            const row = bufferedData[dataIndex];
+        // バッチ処理用の関数
+        const processBatch = async (startIndex, batchSize) => {
+            for (let i = startIndex; i < Math.min(startIndex + batchSize, totalCount); i++) {
+                const row = bufferedData[i];
 
-            // PDF生成の初期化
-            const doc = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
+                // PDF生成の初期化
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
 
-            // バーコード画像の生成（有効なJANコードを使用）
-            const barcodeImage = generateBarcodeImage(
-                row.B1 || '',                // 商品名1
-                row.B2 || '',                // 商品名2
-                row.B3 || '',                // 商品名3
-                row.B4 || '',                // 商品名4
-                row.A || '',                 // 商品コード
-                getValidJANCode(row.C)       // 有効なJANコード
-            );
+                // バーコード画像の生成
+                const barcodeImage = generateBarcodeImage(
+                    row.B1 || '',
+                    row.B2 || '',
+                    row.B3 || '',
+                    row.B4 || '',
+                    row.A || '',
+                    getValidJANCode(row.C)
+                );
 
-            // 画像の読み込み完了を待機
-            await new Promise(resolve => {
-                if (barcodeImage.complete) resolve();
-                else barcodeImage.onload = resolve;
-            });
+                // 画像の読み込み完了を待機
+                await new Promise(resolve => {
+                    if (barcodeImage.complete) resolve();
+                    else barcodeImage.onload = resolve;
+                });
 
-            // ページ内にバーコードを格子状に配置
-            for (let row = 0; row < PDF_CONFIG.rows; row++) {
-                for (let col = 0; col < PDF_CONFIG.columns; col++) {
-                    const xPos = PDF_CONFIG.marginX + col * PDF_CONFIG.cellWidth;
-                    const yPos = PDF_CONFIG.marginY + row * PDF_CONFIG.cellHeight;
-                    
-                    doc.addImage(
-                        barcodeImage,
-                        'PNG',
-                        xPos,
-                        yPos,
-                        PDF_CONFIG.cellWidth,
-                        PDF_CONFIG.cellHeight
-                    );
+                // ページ内にバーコードを格子状に配置
+                for (let row = 0; row < PDF_CONFIG.rows; row++) {
+                    for (let col = 0; col < PDF_CONFIG.columns; col++) {
+                        const xPos = PDF_CONFIG.marginX + col * PDF_CONFIG.cellWidth;
+                        const yPos = PDF_CONFIG.marginY + row * PDF_CONFIG.cellHeight;
+                        
+                        doc.addImage(
+                            barcodeImage,
+                            'PNG',
+                            xPos,
+                            yPos,
+                            PDF_CONFIG.cellWidth,
+                            PDF_CONFIG.cellHeight
+                        );
+                    }
                 }
+
+                // 商品コードをファイル名に使用
+                const fileName = `barcode-${row.A || 'unknown'}.pdf`;
+                doc.save(fileName);
+
+                // 進捗状況を更新
+                processedCount++;
+                
+                // ブラウザの処理を空ける
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
+        };
 
-            // 商品コードをファイル名に使用
-            const fileName = `barcode-${row.A || 'unknown'}.pdf`;
-
-            // PDFを保存
-            doc.save(fileName);
+        // バッチサイズを5に設定して処理
+        const BATCH_SIZE = 5;
+        for (let startIndex = 0; startIndex < totalCount; startIndex += BATCH_SIZE) {
+            await processBatch(startIndex, BATCH_SIZE);
         }
+
+        alert(`${processedCount}個のPDFが生成されました。`);
     } catch (error) {
         console.error('PDF生成エラー:', error);
         alert('PDFの生成中にエラーが発生しました。');
     }
 }
-
-// ===== バーコード画像保存関連の関数 =====
 
 /**
  * 指定された画像を非同期でダウンロードする関数
